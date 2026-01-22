@@ -27,6 +27,19 @@ const observer = new IntersectionObserver(function(entries) {
     });
 }, observerOptions);
 
+// Throttle function for performance optimization
+function throttle(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
 // Observe all sections
 document.addEventListener('DOMContentLoaded', function() {
     const sections = document.querySelectorAll('section');
@@ -37,17 +50,20 @@ document.addEventListener('DOMContentLoaded', function() {
         observer.observe(section);
     });
 
-    // Highlight active navigation item
+    // Combined scroll handler with throttling
     const navLinks = document.querySelectorAll('.castle-nav a');
+    const heroSection = document.querySelector('.hero-section');
     
-    window.addEventListener('scroll', function() {
+    const handleScroll = throttle(function() {
+        const scrolled = window.pageYOffset;
+        
+        // Highlight active navigation item
         let current = '';
         const sections = document.querySelectorAll('section');
         
         sections.forEach(section => {
             const sectionTop = section.offsetTop;
-            const sectionHeight = section.clientHeight;
-            if (pageYOffset >= sectionTop - 200) {
+            if (scrolled >= sectionTop - 200) {
                 current = section.getAttribute('id');
             }
         });
@@ -58,17 +74,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 link.classList.add('active');
             }
         });
-    });
-});
-
-// Add parallax effect to hero section
-window.addEventListener('scroll', function() {
-    const heroSection = document.querySelector('.hero-section');
-    if (heroSection) {
-        const scrolled = window.pageYOffset;
-        heroSection.style.transform = `translateY(${scrolled * 0.5}px)`;
-        heroSection.style.opacity = 1 - scrolled / 600;
-    }
+        
+        // Parallax effect for hero section
+        if (heroSection) {
+            heroSection.style.transform = `translateY(${scrolled * 0.5}px)`;
+            heroSection.style.opacity = 1 - scrolled / 600;
+        }
+    }, 100);
+    
+    window.addEventListener('scroll', handleScroll);
 });
 
 // Add castle tower animation on load
@@ -79,26 +93,7 @@ window.addEventListener('load', function() {
     });
 });
 
-// Add CSS animation for tower rise (injected via JavaScript)
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes towerRise {
-        from {
-            transform: translateY(100px);
-            opacity: 0;
-        }
-        to {
-            transform: translateY(0);
-            opacity: 1;
-        }
-    }
 
-    .castle-nav a.active {
-        background: var(--castle-dark);
-        color: var(--castle-cream);
-    }
-`;
-document.head.appendChild(style);
 
 // Console message for visitors
 console.log('%c🏰 Welcome to Grail Kingdom! 🏰', 'font-size: 20px; color: #FFD700; font-weight: bold;');

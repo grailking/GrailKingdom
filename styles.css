@@ -456,3 +456,20 @@ section {
         font-size: 0.9rem;
     }
 }
+
+/* Animations */
+@keyframes towerRise {
+    from {
+        transform: translateY(100px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.castle-nav a.active {
+    background: var(--castle-dark);
+    color: var(--castle-cream);
+}
